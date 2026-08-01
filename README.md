@@ -81,6 +81,30 @@ python scripts/package-release.py
 
 每个归档均包含 README、FONTLOG 和 OFL 文本。分包内部不再重复格式分类，所有字体均直接放在 `fonts/` 下；压缩包内 CSS 的字体 URL 也会同步指向该目录。
 
+## Cloudflare Pages
+
+Pages 会在每次部署时重新生成并校验字体，再把可变字体 CSS、两份 WOFF2、许可证和在线样张整理到 `public/`：
+
+```sh
+python -m pip install -r requirements.txt
+pnpm run build:pages
+```
+
+在 Cloudflare Pages 的 Git 构建设置中使用：
+
+```text
+Build command: python -m pip install -r requirements.txt && pnpm run build:pages
+Build output directory: public
+```
+
+建议固定构建环境变量 `NODE_VERSION=24`、`PYTHON_VERSION=3.13` 和 `PNPM_VERSION=10.33.2`。部署完成后，可直接跨域引入：
+
+```css
+@import url("https://<project>.pages.dev/kaiming-punctuation-variable.css");
+```
+
+`pages/_headers` 会为托管文件提供跨域访问及缓存响应头；同名字体文件可能随版本更新，因此没有设置长期 `immutable` 缓存。
+
 ## GitHub Actions 与 Releases
 
 推送及 pull request 会自动安装锁定依赖、重新构建和校验字体，并上传可下载的 Actions artifact。

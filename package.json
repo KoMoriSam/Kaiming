@@ -6,6 +6,8 @@
   "description": "开明式中文标点字体生成器及 Web 字体产物",
   "scripts": {
     "build": "python scripts/generate-kaiming-punctuation.py",
+    "build:pages": "python scripts/generate-kaiming-punctuation.py && python scripts/build-pages.py",
+    "stage:pages": "python scripts/build-pages.py",
     "package": "python scripts/package-release.py"
   },
   "devDependencies": {
