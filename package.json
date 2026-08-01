@@ -1,0 +1,17 @@
+{
+  "name": "kaiming-punctuation-font",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.33.2",
+  "description": "开明式中文标点字体生成器及 Web 字体产物",
+  "scripts": {
+    "build": "python scripts/generate-kaiming-punctuation.py",
+    "package": "python scripts/package-release.py"
+  },
+  "devDependencies": {
+    "@fontsource-variable/noto-sans-sc": "5.3.0",
+    "@fontsource-variable/noto-serif-sc": "5.3.0",
+    "@fontsource/noto-sans-sc": "5.3.0",
+    "@fontsource/noto-serif-sc": "5.3.0"
+  }
+}

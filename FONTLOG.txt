@@ -1,0 +1,39 @@
+FONTLOG for Kaiming Punctuation
+===============================
+
+This file records user-visible changes to the Kaiming Punctuation fonts.
+
+Version 1.000 - 2026-08-02
+--------------------------
+
+- Derived punctuation outlines from Noto Sans SC and Noto Serif SC.
+- Renamed the derivative families to Kaiming Punctuation Sans and Kaiming
+  Punctuation Serif. The Reserved Font Name "Source" is not used.
+- Added Simplified Chinese localized family names `开明标点黑` and
+  `开明标点宋`, including localized static styles, variable instances, and
+  STAT weight names.
+- Added half-em punctuation metrics, sentence-stop compression, the `halt`
+  feature, and a continuous two-em em-dash ligature.
+- Added complete copyright, OFL license, and license URL records to the
+  OpenType `name` table.
+- Added nine static weights (100-900) for each family in TrueType-flavored
+  WOFF2 and CFF-flavored OTF formats.
+- Switched static master extraction to the static Fontsource packages. Since
+  Noto Serif SC has no upstream 100 master, its Thin outlines are linearly
+  extrapolated from topology-compatible static 200 and 300 masters.
+- Added 100-900 variable TTF and WOFF2 fonts with TrueType outlines, plus
+  variable CFF2 OTF fonts. Every variable font includes nine named instances,
+  distinct instance PostScript names, and complete STAT weight values for
+  Windows DirectWrite compatibility.
+- Organized variable fonts under `fonts/variable` and static fonts under
+  `fonts/static/otf` and `fonts/static/woff2`.
+
+Source fonts
+------------
+
+- Static Noto Sans SC via @fontsource/noto-sans-sc 5.3.0.
+- Static Noto Serif SC via @fontsource/noto-serif-sc 5.3.0.
+- Variable Noto Sans SC via @fontsource-variable/noto-sans-sc 5.3.0.
+- Variable Noto Serif SC via @fontsource-variable/noto-serif-sc 5.3.0.
+
+All fonts are distributed under the SIL Open Font License, Version 1.1.

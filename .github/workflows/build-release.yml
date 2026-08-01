@@ -1,0 +1,98 @@
+name: Build fonts and publish releases
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and verify distributable fonts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install locked font sources
+        run: pnpm install --frozen-lockfile
+
+      - name: Install font build tools
+        run: python -m pip install -r requirements.txt
+
+      - name: Build and verify fonts
+        run: pnpm run build
+
+      - name: Create release archives
+        run: python scripts/package-release.py
+
+      - name: Verify release checksums
+        working-directory: dist
+        run: sha256sum --check SHA256SUMS
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: kaiming-punctuation-${{ github.run_id }}
+          path: |
+            dist/KaimingPunctuation-VF.zip
+            dist/KaimingPunctuation-OTFs.zip
+            dist/KaimingPunctuation-WOFF2.zip
+            dist/SHA256SUMS
+          if-no-files-found: error
+          compression-level: 0
+
+  release:
+    name: Publish GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download release archives
+        uses: actions/download-artifact@v8
+        with:
+          name: kaiming-punctuation-${{ github.run_id }}
+          path: dist
+
+      - name: Create or update GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          assets=(
+            'dist/KaimingPunctuation-VF.zip#All Variable Fonts (OTF, TTF, WOFF2)'
+            'dist/KaimingPunctuation-OTFs.zip#All Static OTFs'
+            'dist/KaimingPunctuation-WOFF2.zip#All Static WOFF2s'
+            'dist/SHA256SUMS#SHA-256 Checksums'
+          )
+          if gh release view "${TAG}" --repo "${REPO}" >/dev/null 2>&1; then
+            gh release upload "${TAG}" "${assets[@]}" --clobber --repo "${REPO}"
+          else
+            gh release create "${TAG}" "${assets[@]}" \
+              --title "Kaiming Punctuation ${TAG}" \
+              --generate-notes \
+              --verify-tag \
+              --repo "${REPO}"
+          fi
