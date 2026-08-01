@@ -8,12 +8,14 @@
     "build": "python scripts/generate-kaiming-punctuation.py",
     "build:pages": "python scripts/generate-kaiming-punctuation.py && python scripts/build-pages.py",
     "stage:pages": "python scripts/build-pages.py",
+    "deploy": "wrangler deploy",
     "package": "python scripts/package-release.py"
   },
   "devDependencies": {
     "@fontsource-variable/noto-sans-sc": "5.3.0",
     "@fontsource-variable/noto-serif-sc": "5.3.0",
     "@fontsource/noto-sans-sc": "5.3.0",
-    "@fontsource/noto-serif-sc": "5.3.0"
+    "@fontsource/noto-serif-sc": "5.3.0",
+    "wrangler": "4.118.0"
   }
 }

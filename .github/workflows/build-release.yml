@@ -44,6 +44,9 @@ jobs:
       - name: Build Cloudflare Pages site
         run: pnpm run stage:pages
 
+      - name: Verify Cloudflare Workers static assets
+        run: pnpm exec wrangler deploy --dry-run
+
       - name: Create release archives
         run: python scripts/package-release.py
 

@@ -1,4 +1,4 @@
-"""Stage the Cloudflare Pages site from verified variable-font outputs."""
+"""Stage Cloudflare static assets from verified variable-font outputs."""
 
 from __future__ import annotations
 
@@ -10,10 +10,10 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE_ROOT = ROOT / "pages"
 OUTPUT_ROOT = ROOT / "public"
 VARIABLE_FONT_ROOT = ROOT / "fonts" / "variable"
+PUBLIC_PREFIXES = (Path(), Path("kaiming"))
 
-SITE_FILES = (
+SITE_ASSETS = (
     (SOURCE_ROOT / "index.html", Path("index.html")),
-    (SOURCE_ROOT / "_headers", Path("_headers")),
     (
         ROOT / "kaiming-punctuation-variable.css",
         Path("kaiming-punctuation-variable.css"),
@@ -21,13 +21,26 @@ SITE_FILES = (
     (ROOT / "LICENSE", Path("LICENSE.txt")),
 )
 
-FONT_FILES = tuple(
+FONT_ASSETS = tuple(
     (
         VARIABLE_FONT_ROOT / f"kaiming-{family}-variable.woff2",
         Path("fonts") / "variable" / f"kaiming-{family}-variable.woff2",
     )
     for family in ("sans", "serif")
 )
+
+
+def published_files() -> tuple[tuple[Path, Path], ...]:
+    """Return root and /kaiming/ aliases plus root-level Workers metadata."""
+    assets = SITE_ASSETS + FONT_ASSETS
+    return (
+        (SOURCE_ROOT / "_headers", Path("_headers")),
+        *(
+            (source, prefix / relative)
+            for prefix in PUBLIC_PREFIXES
+            for source, relative in assets
+        ),
+    )
 
 
 def reset_output_directory() -> None:
@@ -51,7 +64,7 @@ def reset_output_directory() -> None:
 
 
 def main() -> None:
-    files = SITE_FILES + FONT_FILES
+    files = published_files()
     missing = [
         str(source.relative_to(ROOT))
         for source, _ in files
@@ -69,7 +82,10 @@ def main() -> None:
         shutil.copy2(source, destination)
         print(f"Staged {destination.relative_to(ROOT)}")
 
-    print(f"Cloudflare Pages output is ready in {OUTPUT_ROOT.relative_to(ROOT)}/")
+    print(
+        "Cloudflare static assets are ready at / and /kaiming/ "
+        f"in {OUTPUT_ROOT.relative_to(ROOT)}/"
+    )
 
 
 if __name__ == "__main__":

@@ -81,9 +81,9 @@ python scripts/package-release.py
 
 每个归档均包含 README、FONTLOG 和 OFL 文本。分包内部不再重复格式分类，所有字体均直接放在 `fonts/` 下；压缩包内 CSS 的字体 URL 也会同步指向该目录。
 
-## Cloudflare Pages
+## Cloudflare Workers Static Assets / Pages
 
-Pages 会在每次部署时重新生成并校验字体，再把可变字体 CSS、两份 WOFF2、许可证和在线样张整理到 `public/`：
+构建会重新生成并校验字体，再把可变字体 CSS、两份 WOFF2、许可证和在线样张整理到 `public/`。同一套资源会同时发布在根路径和 `public/kaiming/`，以兼容 `workers.dev` 根地址及自定义域名的 `/kaiming/` 子路径：
 
 ```sh
 python -m pip install -r requirements.txt
@@ -97,7 +97,31 @@ Build command: python -m pip install -r requirements.txt && pnpm run build:pages
 Build output directory: public
 ```
 
-建议固定构建环境变量 `NODE_VERSION=24`、`PYTHON_VERSION=3.13` 和 `PNPM_VERSION=10.33.2`。部署完成后，可直接跨域引入：
+如果项目部署地址是 `*.workers.dev`，说明它使用 Workers Static Assets。仓库中的 `wrangler.jsonc` 会明确把完整的 `public/` 作为资源目录；在 Workers Builds 中使用：
+
+```text
+Build command: python -m pip install -r requirements.txt && pnpm run build:pages
+Deploy command: pnpm exec wrangler deploy
+```
+
+不要在 Workers Builds 中另行指定单个 HTML 文件或仓库根目录作为静态资源目录，否则嵌套的 `fonts/variable/*.woff2` 不会随部署上传。
+
+仓库有意不在 `wrangler.jsonc` 中保存域名或 Worker Routes。若要把站点挂载到自定义主机的 `/kaiming/` 下，请在 Cloudflare Dashboard 的 **Worker → Settings → Domains & Routes → Add → Route** 中手动添加：
+
+```text
+<host>/kaiming
+<host>/kaiming/*
+```
+
+`<host>` 必须在 Cloudflare DNS 中存在并开启代理（橙色云）。部署后可从自定义域名引入：
+
+```css
+@import url("https://<host>/kaiming/kaiming-punctuation-variable.css");
+```
+
+对应字体文件位于 `https://<host>/kaiming/fonts/variable/`。`workers_dev` 保持启用，因此 `*.workers.dev` 根路径仍可访问。域名和 Route 由 Dashboard 管理，后续执行 `wrangler deploy` 不会把个人域名写入仓库。
+
+建议固定构建环境变量 `NODE_VERSION=24`、`PYTHON_VERSION=3.13` 和 `PNPM_VERSION=10.33.2`。使用传统 Pages 项目时，也可直接跨域引入：
 
 ```css
 @import url("https://<project>.pages.dev/kaiming-punctuation-variable.css");
