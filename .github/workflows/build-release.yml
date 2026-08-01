@@ -41,6 +41,9 @@ jobs:
       - name: Build and verify fonts
         run: pnpm run build
 
+      - name: Build Cloudflare Pages site
+        run: pnpm run stage:pages
+
       - name: Create release archives
         run: python scripts/package-release.py
 

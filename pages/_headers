@@ -1,0 +1,10 @@
+/*
+  Access-Control-Allow-Origin: *
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Content-Type-Options: nosniff
+
+/kaiming-punctuation-variable.css
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/fonts/variable/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
