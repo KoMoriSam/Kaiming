@@ -21,7 +21,7 @@ COMMON_FILES = (
     (ROOT / "FONTLOG.txt", Path("FONTLOG.txt")),
     (ROOT / "LICENSE", Path("LICENSE")),
     # OFL.txt at the archive root follows the conventional OFL release layout.
-    (ROOT / "LICENSES" / "OFL-1.1.txt", Path("OFL.txt")),
+    (ROOT / "LICENSE", Path("OFL.txt")),
 )
 
 ARCHIVE_NAMES = (
