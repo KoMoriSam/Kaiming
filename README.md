@@ -98,4 +98,4 @@ git push origin v1.0.0
 
 字体产物衍生自 Noto Sans SC 与 Noto Serif SC，并包含 Kaiming Punctuation 的修改，全部遵循 SIL Open Font License 1.1。原版权、Reserved Font Name 声明及修改版权同时写入字体元数据和许可文件。
 
-完整许可文本见 [`LICENSES/OFL-1.1.txt`](LICENSES/OFL-1.1.txt)，修改记录见 [`FONTLOG.txt`](FONTLOG.txt)。
+完整许可文本见 [`LICENSE`](LICENSE)，修改记录见 [`FONTLOG.txt`](FONTLOG.txt)。

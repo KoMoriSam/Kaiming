@@ -19,7 +19,7 @@ VARIABLE_FORMATS = ("otf", "ttf", "woff2")
 COMMON_FILES = (
     (ROOT / "README.md", Path("README.md")),
     (ROOT / "FONTLOG.txt", Path("FONTLOG.txt")),
-    (ROOT / "LICENSES" / "OFL-1.1.txt", Path("LICENSES/OFL-1.1.txt")),
+    (ROOT / "LICENSE", Path("LICENSE")),
     # OFL.txt at the archive root follows the conventional OFL release layout.
     (ROOT / "LICENSES" / "OFL-1.1.txt", Path("OFL.txt")),
 )
