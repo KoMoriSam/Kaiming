@@ -24,7 +24,7 @@ SITE_ASSETS = (
 FONT_ASSETS = tuple(
     (
         VARIABLE_FONT_ROOT / f"kaiming-{family}-variable.woff2",
-        Path("fonts") / "variable" / f"kaiming-{family}-variable.woff2",
+        Path(f"{family.title()}-VF.woff2"),
     )
     for family in ("sans", "serif")
 )

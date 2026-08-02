@@ -2,7 +2,7 @@
 
 @font-face {
   font-family: "Kaiming Punctuation Sans";
-  src: url("./fonts/variable/kaiming-sans-variable.woff2") format("woff2");
+  src: url("./Sans-VF.woff2") format("woff2");
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
@@ -14,7 +14,7 @@
 
 @font-face {
   font-family: "Kaiming Punctuation Serif";
-  src: url("./fonts/variable/kaiming-serif-variable.woff2") format("woff2");
+  src: url("./Serif-VF.woff2") format("woff2");
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;

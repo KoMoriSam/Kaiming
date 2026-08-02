@@ -6,11 +6,11 @@
 /kaiming-punctuation-variable.css
   Cache-Control: public, max-age=3600, must-revalidate
 
-/fonts/variable/*
+/*-VF.woff2
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 
 /kaiming/kaiming-punctuation-variable.css
   Cache-Control: public, max-age=3600, must-revalidate
 
-/kaiming/fonts/variable/*
+/kaiming/*-VF.woff2
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
