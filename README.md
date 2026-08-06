@@ -27,16 +27,10 @@ Windows 本地安装和字体查看器优先使用 `fonts/variable/*.ttf`。WOFF
 
 ## 网页使用
 
-静态字体：
+项目只提供一份使用可变字体的 CSS：
 
 ```css
-@import url("./kaiming-punctuation.css");
-```
-
-可变字体：
-
-```css
-@import url("./kaiming-punctuation-variable.css");
+@import url("./index.css");
 ```
 
 CSS 提供以下字体族：
@@ -56,7 +50,7 @@ CSS 提供以下字体族：
 pnpm install --frozen-lockfile
 python -m venv .venv
 .venv/Scripts/python -m pip install -r requirements.txt
-.venv/Scripts/python scripts/generate-kaiming-punctuation.py
+.venv/Scripts/python scripts/generate-fonts.py
 ```
 
 在 macOS 或 Linux 上，将最后两条命令中的 `.venv/Scripts/python` 改为 `.venv/bin/python`。生成器会构建并重新打开校验全部 42 个文件，包括：
@@ -75,15 +69,15 @@ python scripts/package-release.py
 
 `dist/` 中会生成三个固定名称的 ZIP 和 `SHA256SUMS`：
 
-- `KaimingPunctuation-VF.zip`：全部 OTF、TTF、WOFF2 可变字体及变量 CSS。
+- `KaimingPunctuation-VF.zip`：全部 OTF、TTF、WOFF2 可变字体及 `index.css`。
 - `KaimingPunctuation-OTFs.zip`：全部静态 OTF。
-- `KaimingPunctuation-WOFF2.zip`：全部静态 WOFF2 及静态 CSS。
+- `KaimingPunctuation-WOFF2.zip`：全部静态 WOFF2。
 
-每个归档均包含 README、FONTLOG 和 OFL 文本。分包内部不再重复格式分类，所有字体均直接放在 `fonts/` 下；压缩包内 CSS 的字体 URL 也会同步指向该目录。
+每个归档均包含 README、FONTLOG 和 OFL 文本。分包内部不再重复格式分类，所有字体均直接放在 `fonts/` 下；三个归档中只有可变字体包包含 `index.css`。
 
 ## Cloudflare Workers Static Assets / Pages
 
-构建会重新生成并校验字体，再把可变字体 CSS、两份 WOFF2、许可证和在线样张整理到 `public/`。同一套资源会同时发布在根路径和 `public/kaiming/`，以兼容 `workers.dev` 根地址及自定义域名的 `/kaiming/` 子路径：
+构建会重新生成并校验字体，再把 `index.css`、两份可变 WOFF2、许可证和在线样张整理到 `public/`。同一套资源会同时发布在根路径和 `public/kaiming/`，以兼容 `workers.dev` 根地址及自定义域名的 `/kaiming/` 子路径：
 
 ```sh
 python -m pip install -r requirements.txt
@@ -116,15 +110,15 @@ Deploy command: pnpm exec wrangler deploy
 `<host>` 必须在 Cloudflare DNS 中存在并开启代理（橙色云）。部署后可从自定义域名引入：
 
 ```css
-@import url("https://<host>/kaiming/kaiming-punctuation-variable.css");
+@import url("https://<host>/kaiming/index.css");
 ```
 
-对应字体文件位于 `https://<host>/kaiming/fonts/variable/`。`workers_dev` 保持启用，因此 `*.workers.dev` 根路径仍可访问。域名和 Route 由 Dashboard 管理，后续执行 `wrangler deploy` 不会把个人域名写入仓库。
+对应字体文件为 `https://<host>/kaiming/Sans-VF.woff2` 和 `Serif-VF.woff2`。`workers_dev` 保持启用，因此 `*.workers.dev` 根路径仍可访问。域名和 Route 由 Dashboard 管理，后续执行 `wrangler deploy` 不会把个人域名写入仓库。
 
 建议固定构建环境变量 `NODE_VERSION=24`、`PYTHON_VERSION=3.13` 和 `PNPM_VERSION=10.33.2`。使用传统 Pages 项目时，也可直接跨域引入：
 
 ```css
-@import url("https://<project>.pages.dev/kaiming-punctuation-variable.css");
+@import url("https://<project>.pages.dev/index.css");
 ```
 
 `pages/_headers` 会为托管文件提供跨域访问及缓存响应头；同名字体文件可能随版本更新，因此没有设置长期 `immutable` 缓存。

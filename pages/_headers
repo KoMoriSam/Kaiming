@@ -3,13 +3,13 @@
   Referrer-Policy: strict-origin-when-cross-origin
   X-Content-Type-Options: nosniff
 
-/kaiming-punctuation-variable.css
+/index.css
   Cache-Control: public, max-age=3600, must-revalidate
 
 /*-VF.woff2
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 
-/kaiming/kaiming-punctuation-variable.css
+/kaiming/index.css
   Cache-Control: public, max-age=3600, must-revalidate
 
 /kaiming/*-VF.woff2

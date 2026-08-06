@@ -14,10 +14,7 @@ PUBLIC_PREFIXES = (Path(), Path("kaiming"))
 
 SITE_ASSETS = (
     (SOURCE_ROOT / "index.html", Path("index.html")),
-    (
-        ROOT / "kaiming-punctuation-variable.css",
-        Path("kaiming-punctuation-variable.css"),
-    ),
+    (ROOT / "index.css", Path("index.css")),
     (ROOT / "LICENSE", Path("LICENSE")),
 )
 

@@ -74,6 +74,11 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Check out release notes
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref }}
+
       - name: Download release archives
         uses: actions/download-artifact@v8
         with:
@@ -94,11 +99,15 @@ jobs:
             'dist/SHA256SUMS#SHA-256 Checksums'
           )
           if gh release view "${TAG}" --repo "${REPO}" >/dev/null 2>&1; then
+            gh release edit "${TAG}" \
+              --title "Kaiming Punctuation ${TAG}" \
+              --notes-file RELEASE_NOTES.md \
+              --repo "${REPO}"
             gh release upload "${TAG}" "${assets[@]}" --clobber --repo "${REPO}"
           else
             gh release create "${TAG}" "${assets[@]}" \
               --title "Kaiming Punctuation ${TAG}" \
-              --generate-notes \
+              --notes-file RELEASE_NOTES.md \
               --verify-tag \
               --repo "${REPO}"
           fi

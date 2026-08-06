@@ -77,8 +77,8 @@ def release_archives() -> tuple[tuple[str, list[tuple[Path, Path]]], ...]:
                 variable_fonts(),
                 (
                     (
-                        ROOT / "kaiming-punctuation-variable.css",
-                        Path("kaiming-punctuation-variable.css"),
+                        ROOT / "index.css",
+                        Path("index.css"),
                     ),
                 ),
             ),
@@ -89,15 +89,7 @@ def release_archives() -> tuple[tuple[str, list[tuple[Path, Path]]], ...]:
         ),
         (
             ARCHIVE_NAMES[2],
-            with_common_files(
-                static_fonts("woff2"),
-                (
-                    (
-                        ROOT / "kaiming-punctuation.css",
-                        Path("kaiming-punctuation.css"),
-                    ),
-                ),
-            ),
+            with_common_files(static_fonts("woff2")),
         ),
     )
 

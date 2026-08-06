@@ -6,7 +6,12 @@ nine processed masters, so every shipped static weight remains an exact master.
 
 Rules baked into the output:
 
-* pauses and brackets have a 0.5-em base advance;
+* pauses, brackets, middle dot, en dash, slash, and vertical bar have a
+  centered 0.5-em base advance;
+* middle dot, en dash, slash, vertical bar, and em dash are vertically aligned
+  on the CJK visual center axis;
+* four-per-em, en, and ideographic spaces have 0.25-em, 0.5-em, and 1-em
+  advances respectively;
 * stops have a 1-em base advance;
 * ``。？！`` expose a ``halt`` adjustment that removes their trailing 0.5 em
   when CSS line layout trims fullwidth punctuation at a line end;
@@ -14,7 +19,7 @@ Rules baked into the output:
   advance with the source typeface's normal contour gap;
 * adjacent stops are compressed from 2 em to 1.5 em;
 * an em dash is centered against the CJK em box and ``——`` becomes one
-  continuous 2-em ligature whose outer side bearings match the brackets;
+  continuous 2-em ligature with 0.05-em outer side bearings;
 * ellipsis pairs remain 2 em and long-mark pairs receive no kerning.
 
 Requires Python packages ``fonttools`` and ``brotli``. Generated font files are
@@ -23,6 +28,7 @@ punctuation-rule change.
 """
 
 from copy import deepcopy
+from math import floor
 from pathlib import Path
 
 from fontTools.designspaceLib import (
@@ -114,6 +120,7 @@ OFL_URL = "https://openfontlicense.org"
 SOURCE_PARTS = {
     "latin": (0x2018, 0x2019),
     "5": (0xFF5B, 0xFF5D),
+    "91": (0x2002,),
     "100": (0x3008,),
     "101": (0x3009, 0x3016, 0x3017),
     "102": (0xFF3B, 0xFF3D),
@@ -122,10 +129,19 @@ SOURCE_PARTS = {
     "110": (0x300C, 0x300D),
     "114": (0x2026,),
     "115": (0xFF1B,),
-    "116": (0x300A, 0x300B),
+    "116": (0x3000, 0x300A, 0x300B),
     "117": (0x201C, 0x201D, 0x3010, 0x3011, 0xFF1F),
-    "118": (0xFF01, 0xFF08, 0xFF09),
-    "119": (0x2014, 0x3001, 0x3002, 0xFF0C, 0xFF1A),
+    "118": (0x007C, 0xFF01, 0xFF08, 0xFF09),
+    "119": (
+        0x002F,
+        0x00B7,
+        0x2013,
+        0x2014,
+        0x3001,
+        0x3002,
+        0xFF0C,
+        0xFF1A,
+    ),
 }
 
 OPENING = {
@@ -161,8 +177,19 @@ CLOSING = {
 PAUSE_MARKS = {0x3001, 0xFF0C, 0xFF1A, 0xFF1B}
 FULL_STOPS = {0x3002, 0xFF01, 0xFF1F}
 LONG_MARKS = {0x2014, 0x2026}
-HALF_WIDTH = OPENING | CLOSING | PAUSE_MARKS
-ALL_CODEPOINTS = set().union(*SOURCE_PARTS.values())
+DASH_PAIR_SIDE_BEARING_DIVISOR = 20
+CENTERED_HALF_WIDTH = {0x002F, 0x007C, 0x00B7, 0x2013}
+VERTICALLY_CENTERED_HALF_WIDTH = CENTERED_HALF_WIDTH
+HALF_WIDTH = OPENING | CLOSING | PAUSE_MARKS | CENTERED_HALF_WIDTH
+SPACE_ADVANCE_DIVISORS = {
+    0x2005: 4,
+    0x2002: 2,
+    0x3000: 1,
+}
+SYNTHETIC_SOURCES = {0x2005: 0x2002}
+ALL_CODEPOINTS = (
+    set().union(*SOURCE_PARTS.values()) | set(SYNTHETIC_SOURCES)
+)
 BRACKET_SIDE_REFERENCES = (
     (0xFF08, 0xFF09),
     (0x201C, 0x201D),
@@ -195,6 +222,11 @@ def source_path(
 def extrapolate_value(light: int, regular: int) -> int:
     """Extrapolate a 100 value from compatible 200 and 300 masters."""
     return round(2 * light - regular)
+
+
+def round_half_up(value: float) -> int:
+    """Round a coordinate consistently when it lands on a half unit."""
+    return floor(value + 0.5)
 
 
 def extrapolate_glyph(
@@ -270,14 +302,34 @@ def expand_simple_glyph(glyph, glyf) -> None:
     glyph.expand(glyf)
 
 
-def shift_glyph(glyph, glyf, distance: int) -> None:
-    if not distance:
+def shift_glyph(
+    glyph,
+    glyf,
+    x_distance: int = 0,
+    y_distance: int = 0,
+) -> None:
+    if not x_distance and not y_distance:
         return
     expand_simple_glyph(glyph, glyf)
     if glyph.numberOfContours:
         for index, (x, y) in enumerate(glyph.coordinates):
-            glyph.coordinates[index] = (x + distance, y)
+            glyph.coordinates[index] = (
+                x + x_distance,
+                y + y_distance,
+            )
         glyph.recalcBounds(glyf)
+
+
+def outline_bounds(
+    glyph,
+    glyf,
+) -> tuple[float, float, float, float]:
+    """Return actual ink bounds, excluding non-extremal curve controls."""
+    pen = BoundsPen(None)
+    glyph.draw(pen, glyf)
+    if pen.bounds is None:
+        raise ValueError("Glyph has no outline bounds")
+    return pen.bounds
 
 
 def fit_dash_to_em(
@@ -295,7 +347,9 @@ def fit_dash_to_em(
         raise ValueError("Em dash has no horizontal ink extent")
 
     x_min = glyph.xMin
-    y_shift = round((target_center_sum - glyph.yMin - glyph.yMax) / 2)
+    y_shift = round_half_up(
+        (target_center_sum - glyph.yMin - glyph.yMax) / 2
+    )
     single_side_bearing = round(pair_side_bearing / 2)
     target_width = units_per_em - single_side_bearing * 2
     for index, (x, y) in enumerate(glyph.coordinates):
@@ -306,12 +360,26 @@ def fit_dash_to_em(
     glyph.recalcBounds(glyf)
 
 
-def double_dash_glyph(glyph, glyf):
-    """Return one continuous two-em outline for the required dash pair."""
+def double_dash_glyph(
+    glyph,
+    glyf,
+    units_per_em: int,
+    side_bearing: int,
+):
+    """Return a continuous two-em outline with fixed outer side space."""
     pair = deepcopy(glyph)
     expand_simple_glyph(pair, glyf)
     for index, (x, y) in enumerate(pair.coordinates):
         pair.coordinates[index] = (x * 2, y)
+    pair.recalcBounds(glyf)
+    ink_width = pair.xMax - pair.xMin
+    target_width = units_per_em * 2 - side_bearing * 2
+    x_min = pair.xMin
+    for index, (x, y) in enumerate(pair.coordinates):
+        pair.coordinates[index] = (
+            side_bearing + round((x - x_min) * target_width / ink_width),
+            y,
+        )
     pair.recalcBounds(glyf)
     return pair
 
@@ -358,7 +426,7 @@ def set_font_identity(font: TTFont, style: str, weight: int | None) -> None:
         else postscript_family
     )
     full_name = family if weight is None else f"{family} {subfamily}"
-    unique_id = f"1.000;Kaiming;{postscript_name}"
+    unique_id = f"1.100;Kaiming;{postscript_name}"
     copyright_notice = (
         f"{SOURCE_COPYRIGHTS[style]} {MODIFICATION_COPYRIGHT}"
     )
@@ -382,7 +450,7 @@ def set_font_identity(font: TTFont, style: str, weight: int | None) -> None:
         2: legacy_subfamily,
         3: unique_id,
         4: full_name,
-        5: "Version 1.000",
+        5: "Version 1.100",
         6: postscript_name,
         13: OFL_DESCRIPTION,
         14: OFL_URL,
@@ -556,13 +624,22 @@ def build_processed_font(
     else:
         reference_glyph = base["glyf"][reference_names[0]]
         reference_glyph.recalcBounds(base["glyf"])
-    reference_center_sum = reference_glyph.yMin + reference_glyph.yMax
+    # Use one integer visual axis for every centered mark. Normalizing the
+    # doubled center to an even value prevents glyphs with different bound
+    # parity from rounding to opposite sides of a half-unit CJK center.
+    reference_center_sum = round(
+        (reference_glyph.yMin + reference_glyph.yMax) / 2
+    ) * 2
 
     for codepoint in sorted(ALL_CODEPOINTS):
-        source_records = sources[codepoint]
+        source_codepoint = SYNTHETIC_SOURCES.get(codepoint, codepoint)
+        source_records = sources[source_codepoint]
         source_font, source_name = source_records[0]
         glyf = source_font["glyf"]
-        if len(source_records) == 2:
+        if (
+            len(source_records) == 2
+            and codepoint not in SPACE_ADVANCE_DIVISORS
+        ):
             regular_font, regular_name = source_records[1]
             glyph = extrapolate_glyph(
                 source_font,
@@ -582,7 +659,32 @@ def build_processed_font(
             glyph = deepcopy(source_glyph)
             width, lsb = source_font["hmtx"].metrics[source_name]
 
-        if codepoint in HALF_WIDTH:
+        if codepoint in SPACE_ADVANCE_DIVISORS:
+            if glyph.numberOfContours:
+                raise ValueError(
+                    f"U+{codepoint:04X} unexpectedly has a visible outline"
+                )
+            divisor = SPACE_ADVANCE_DIVISORS[codepoint]
+            if units_per_em % divisor:
+                raise ValueError(
+                    f"{units_per_em} UPM is not divisible by {divisor}"
+                )
+            width = units_per_em // divisor
+            lsb = 0
+        elif codepoint in CENTERED_HALF_WIDTH:
+            x_min, y_min, x_max, y_max = outline_bounds(glyph, glyf)
+            x_placement = round(
+                (half_em - x_min - x_max) / 2
+            )
+            y_placement = 0
+            if codepoint in VERTICALLY_CENTERED_HALF_WIDTH:
+                y_placement = round_half_up(
+                    (reference_center_sum - y_min - y_max) / 2
+                )
+            shift_glyph(glyph, glyf, x_placement, y_placement)
+            width = half_em
+            lsb = glyph.xMin
+        elif codepoint in HALF_WIDTH:
             source_halt_values = []
             for halt_font, halt_name in source_records:
                 cache_key = id(halt_font)
@@ -630,7 +732,20 @@ def build_processed_font(
     metrics[dash_name] = (units_per_em, dash_glyph.xMin)
 
     dash_pair_name = "emDash_pair"
-    dash_pair = double_dash_glyph(dash_glyph, base["glyf"])
+    if units_per_em % DASH_PAIR_SIDE_BEARING_DIVISOR:
+        raise ValueError(
+            f"{units_per_em} UPM is not divisible by "
+            f"{DASH_PAIR_SIDE_BEARING_DIVISOR}"
+        )
+    dash_pair_side_bearing = (
+        units_per_em // DASH_PAIR_SIDE_BEARING_DIVISOR
+    )
+    dash_pair = double_dash_glyph(
+        dash_glyph,
+        base["glyf"],
+        units_per_em,
+        dash_pair_side_bearing,
+    )
     glyph_order.append(dash_pair_name)
     glyphs[dash_pair_name] = dash_pair
     metrics[dash_pair_name] = (units_per_em * 2, dash_pair.xMin)
@@ -695,7 +810,7 @@ def convert_to_cff(font: TTFont, style: str, weight: int) -> TTFont:
     builder.setupCFF(
         postscript_name,
         {
-            "version": "1.000",
+            "version": "1.100",
             "FullName": f"{family} {subfamily}",
             "FamilyName": family,
             "Weight": subfamily,
@@ -850,13 +965,21 @@ def pair_values(font: TTFont, left: str, right: str) -> tuple[int, int, int, int
     return tuple(totals)
 
 
-def glyph_bounds(font: TTFont, glyph_name: str) -> tuple[float, float]:
+def glyph_ink_bounds(
+    font: TTFont,
+    glyph_name: str,
+) -> tuple[float, float, float, float]:
     glyph_set = font.getGlyphSet()
     pen = BoundsPen(glyph_set)
     glyph_set[glyph_name].draw(pen)
     if pen.bounds is None:
         raise ValueError(f"{glyph_name} has no outline bounds")
-    return pen.bounds[0], pen.bounds[2]
+    return pen.bounds
+
+
+def glyph_bounds(font: TTFont, glyph_name: str) -> tuple[float, float]:
+    bounds = glyph_ink_bounds(font, glyph_name)
+    return bounds[0], bounds[2]
 
 
 def ligature_glyph(font: TTFont, feature_tag: str, first: str, second: str) -> str:
@@ -967,12 +1090,20 @@ def glyf_outline_signature(font: TTFont) -> tuple:
     for codepoint in sorted(ALL_CODEPOINTS):
         glyph = glyf[cmap[codepoint]]
         expand_simple_glyph(glyph, glyf)
+        if glyph.numberOfContours:
+            coordinates = tuple(glyph.coordinates)
+            end_points = tuple(glyph.endPtsOfContours)
+            flags = tuple(flag & 1 for flag in glyph.flags)
+        else:
+            coordinates = ()
+            end_points = ()
+            flags = ()
         signatures.append(
             (
                 codepoint,
-                tuple(glyph.coordinates),
-                tuple(glyph.endPtsOfContours),
-                tuple(flag & 1 for flag in glyph.flags),
+                coordinates,
+                end_points,
+                flags,
             )
         )
     return tuple(signatures)
@@ -1015,7 +1146,11 @@ def bracket_side_bearing_from_font(
     return round(sum(bearings) / len(bearings))
 
 
-def verify_layout(font: TTFont, label: str) -> None:
+def verify_layout(
+    font: TTFont,
+    label: str,
+    centered_tolerance: float = 1.01,
+) -> None:
     cmap = font.getBestCmap()
     if set(cmap) != ALL_CODEPOINTS:
         raise ValueError(f"{label}: cmap does not match the configured set")
@@ -1025,11 +1160,43 @@ def verify_layout(font: TTFont, label: str) -> None:
 
     for codepoint, glyph_name in cmap.items():
         width = font["hmtx"].metrics[glyph_name][0]
-        expected = half_em if codepoint in HALF_WIDTH else units_per_em
+        if codepoint in SPACE_ADVANCE_DIVISORS:
+            expected = units_per_em // SPACE_ADVANCE_DIVISORS[codepoint]
+        else:
+            expected = half_em if codepoint in HALF_WIDTH else units_per_em
         if width != expected:
             raise ValueError(
                 f"{label}: U+{codepoint:04X} has width {width}, "
                 f"expected {expected}"
+            )
+
+    glyph_set = font.getGlyphSet()
+    for codepoint in SPACE_ADVANCE_DIVISORS:
+        pen = BoundsPen(glyph_set)
+        glyph_set[cmap[codepoint]].draw(pen)
+        if pen.bounds is not None:
+            raise ValueError(
+                f"{label}: U+{codepoint:04X} has a visible outline"
+            )
+
+    for codepoint in CENTERED_HALF_WIDTH:
+        x_min, x_max = glyph_bounds(font, cmap[codepoint])
+        # Variable curve interpolation can move an extremum by a few font
+        # units even when all compatible masters share the same center axis.
+        if abs(x_min + x_max - half_em) > centered_tolerance:
+            raise ValueError(
+                f"{label}: U+{codepoint:04X} is not centered in its "
+                f"half-em advance: bounds={x_min}..{x_max}"
+            )
+
+    _, dash_y_min, _, dash_y_max = glyph_ink_bounds(font, cmap[0x2014])
+    vertical_center_sum = dash_y_min + dash_y_max
+    for codepoint in VERTICALLY_CENTERED_HALF_WIDTH:
+        _, y_min, _, y_max = glyph_ink_bounds(font, cmap[codepoint])
+        if abs(y_min + y_max - vertical_center_sum) > centered_tolerance:
+            raise ValueError(
+                f"{label}: U+{codepoint:04X} is not vertically centered "
+                f"on the CJK visual axis: bounds={y_min}..{y_max}"
             )
 
     for closing in CLOSING:
@@ -1087,11 +1254,14 @@ def verify_layout(font: TTFont, label: str) -> None:
     dash_pair_name = ligature_glyph(font, "ccmp", dash_name, dash_name)
     dash_pair_width = font["hmtx"].metrics[dash_pair_name][0]
     dash_pair_min, dash_pair_max = glyph_bounds(font, dash_pair_name)
+    dash_pair_side_bearing = (
+        units_per_em // DASH_PAIR_SIDE_BEARING_DIVISOR
+    )
     if (
         dash_pair_width != units_per_em * 2
-        or abs(dash_pair_min - expected_pair_side) > 4
+        or abs(dash_pair_min - dash_pair_side_bearing) > 4
         or abs(
-            dash_pair_max - (units_per_em * 2 - expected_pair_side)
+            dash_pair_max - (units_per_em * 2 - dash_pair_side_bearing)
         ) > 4
     ):
         raise ValueError(
@@ -1228,7 +1398,11 @@ def verify(output: Path, style: str, variable: bool) -> None:
                 inplace=False,
                 optimize=True,
             )
-            verify_layout(instance, f"{output.name}@{weight}")
+            verify_layout(
+                instance,
+                f"{output.name}@{weight}",
+                centered_tolerance=5.01,
+            )
     else:
         if "fvar" in font:
             raise ValueError(f"{output.name}: static font unexpectedly has fvar")
@@ -1304,7 +1478,7 @@ def main() -> None:
     print("Each family includes nine static weights and 100-900 variable fonts.")
     print("All closing-opening pairs are 1 em with positive contour gaps.")
     print("Fullwidth sentence stops expose a trailing 0.5-em halt adjustment.")
-    print("Em-dash pairs are centered 2-em ligatures with bracket-matched side space.")
+    print("Em-dash pairs are centered 2-em ligatures with 0.05-em side space.")
 
 
 if __name__ == "__main__":
