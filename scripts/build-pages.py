@@ -18,7 +18,7 @@ SITE_ASSETS = (
         ROOT / "kaiming-punctuation-variable.css",
         Path("kaiming-punctuation-variable.css"),
     ),
-    (ROOT / "LICENSE", Path("LICENSE.txt")),
+    (ROOT / "LICENSE", Path("LICENSE")),
 )
 
 FONT_ASSETS = tuple(
@@ -31,10 +31,11 @@ FONT_ASSETS = tuple(
 
 
 def published_files() -> tuple[tuple[Path, Path], ...]:
-    """Return root and /kaiming/ aliases plus root-level Workers metadata."""
+    """Return root and /kaiming/ aliases plus Workers routing metadata."""
     assets = SITE_ASSETS + FONT_ASSETS
     return (
         (SOURCE_ROOT / "_headers", Path("_headers")),
+        (SOURCE_ROOT / "_redirects", Path("_redirects")),
         *(
             (source, prefix / relative)
             for prefix in PUBLIC_PREFIXES

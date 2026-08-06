@@ -1,0 +1,4 @@
+# Keep the font CDN paths public; redirect only the retired specimen page.
+/kaiming https://komori.cc/kaiming 301
+/kaiming/ https://komori.cc/kaiming 301
+/kaiming/index.html https://komori.cc/kaiming 301
