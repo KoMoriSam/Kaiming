@@ -13,7 +13,6 @@ VARIABLE_FONT_ROOT = ROOT / "fonts" / "variable"
 PUBLIC_PREFIXES = (Path(), Path("kaiming"))
 
 SITE_ASSETS = (
-    (SOURCE_ROOT / "index.html", Path("index.html")),
     (ROOT / "index.css", Path("index.css")),
     (ROOT / "LICENSE", Path("LICENSE")),
 )
