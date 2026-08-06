@@ -17,7 +17,7 @@
 
 @font-face {
   font-family: "Kaiming Punctuation Sans";
-  src: url("./fonts/static/woff2/kaiming-sans-100.woff2") format("woff2");
+  src: url("./kaiming-sans-100.woff2") format("woff2");
   font-style: normal;
   font-weight: 100;
   font-display: swap;
@@ -29,7 +29,7 @@
 
 @font-face {
   font-family: "Kaiming Punctuation Sans";
-  src: url("./fonts/static/woff2/kaiming-sans-200.woff2") format("woff2");
+  src: url("./kaiming-sans-200.woff2") format("woff2");
   font-style: normal;
   font-weight: 200;
   font-display: swap;
@@ -41,7 +41,7 @@
 
 @font-face {
   font-family: "Kaiming Punctuation Sans";
-  src: url("./fonts/static/woff2/kaiming-sans-300.woff2") format("woff2");
+  src: url("./kaiming-sans-300.woff2") format("woff2");
   font-style: normal;
   font-weight: 300;
   font-display: swap;
@@ -53,7 +53,7 @@
 
 @font-face {
   font-family: "Kaiming Punctuation Sans";
-  src: url("./fonts/static/woff2/kaiming-sans-400.woff2") format("woff2");
+  src: url("./kaiming-sans-400.woff2") format("woff2");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -65,7 +65,7 @@
 
 @font-face {
   font-family: "Kaiming Punctuation Sans";
-  src: url("./fonts/static/woff2/kaiming-sans-500.woff2") format("woff2");
+  src: url("./kaiming-sans-500.woff2") format("woff2");
   font-style: normal;
   font-weight: 500;
   font-display: swap;
@@ -77,7 +77,7 @@
 
 @font-face {
   font-family: "Kaiming Punctuation Sans";
-  src: url("./fonts/static/woff2/kaiming-sans-600.woff2") format("woff2");
+  src: url("./kaiming-sans-600.woff2") format("woff2");
   font-style: normal;
   font-weight: 600;
   font-display: swap;
@@ -89,7 +89,7 @@
 
 @font-face {
   font-family: "Kaiming Punctuation Sans";
-  src: url("./fonts/static/woff2/kaiming-sans-700.woff2") format("woff2");
+  src: url("./kaiming-sans-700.woff2") format("woff2");
   font-style: normal;
   font-weight: 700;
   font-display: swap;
@@ -101,7 +101,7 @@
 
 @font-face {
   font-family: "Kaiming Punctuation Sans";
-  src: url("./fonts/static/woff2/kaiming-sans-800.woff2") format("woff2");
+  src: url("./kaiming-sans-800.woff2") format("woff2");
   font-style: normal;
   font-weight: 800;
   font-display: swap;
@@ -113,7 +113,7 @@
 
 @font-face {
   font-family: "Kaiming Punctuation Sans";
-  src: url("./fonts/static/woff2/kaiming-sans-900.woff2") format("woff2");
+  src: url("./kaiming-sans-900.woff2") format("woff2");
   font-style: normal;
   font-weight: 900;
   font-display: swap;
@@ -125,7 +125,7 @@
 
 @font-face {
   font-family: "Kaiming Punctuation Serif";
-  src: url("./fonts/static/woff2/kaiming-serif-100.woff2") format("woff2");
+  src: url("./kaiming-serif-100.woff2") format("woff2");
   font-style: normal;
   font-weight: 100;
   font-display: swap;
@@ -137,7 +137,7 @@
 
 @font-face {
   font-family: "Kaiming Punctuation Serif";
-  src: url("./fonts/static/woff2/kaiming-serif-200.woff2") format("woff2");
+  src: url("./kaiming-serif-200.woff2") format("woff2");
   font-style: normal;
   font-weight: 200;
   font-display: swap;
@@ -149,7 +149,7 @@
 
 @font-face {
   font-family: "Kaiming Punctuation Serif";
-  src: url("./fonts/static/woff2/kaiming-serif-300.woff2") format("woff2");
+  src: url("./kaiming-serif-300.woff2") format("woff2");
   font-style: normal;
   font-weight: 300;
   font-display: swap;
@@ -161,7 +161,7 @@
 
 @font-face {
   font-family: "Kaiming Punctuation Serif";
-  src: url("./fonts/static/woff2/kaiming-serif-400.woff2") format("woff2");
+  src: url("./kaiming-serif-400.woff2") format("woff2");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -173,7 +173,7 @@
 
 @font-face {
   font-family: "Kaiming Punctuation Serif";
-  src: url("./fonts/static/woff2/kaiming-serif-500.woff2") format("woff2");
+  src: url("./kaiming-serif-500.woff2") format("woff2");
   font-style: normal;
   font-weight: 500;
   font-display: swap;
@@ -185,7 +185,7 @@
 
 @font-face {
   font-family: "Kaiming Punctuation Serif";
-  src: url("./fonts/static/woff2/kaiming-serif-600.woff2") format("woff2");
+  src: url("./kaiming-serif-600.woff2") format("woff2");
   font-style: normal;
   font-weight: 600;
   font-display: swap;
@@ -197,7 +197,7 @@
 
 @font-face {
   font-family: "Kaiming Punctuation Serif";
-  src: url("./fonts/static/woff2/kaiming-serif-700.woff2") format("woff2");
+  src: url("./kaiming-serif-700.woff2") format("woff2");
   font-style: normal;
   font-weight: 700;
   font-display: swap;
@@ -209,7 +209,7 @@
 
 @font-face {
   font-family: "Kaiming Punctuation Serif";
-  src: url("./fonts/static/woff2/kaiming-serif-800.woff2") format("woff2");
+  src: url("./kaiming-serif-800.woff2") format("woff2");
   font-style: normal;
   font-weight: 800;
   font-display: swap;
@@ -221,7 +221,7 @@
 
 @font-face {
   font-family: "Kaiming Punctuation Serif";
-  src: url("./fonts/static/woff2/kaiming-serif-900.woff2") format("woff2");
+  src: url("./kaiming-serif-900.woff2") format("woff2");
   font-style: normal;
   font-weight: 900;
   font-display: swap;
